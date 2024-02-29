@@ -55,8 +55,7 @@ RegisterNetEvent("cad-voting:server:addVotes", function(id)
     else
         playersdata[cid] = true
         candidates[id].votes = candidates[id].votes + 1
-        exports.sounds:Play3DEntity(source, NetworkGetNetworkIdFromEntity(GetPlayerPed(source)), 3.0,
-            "https://cdn.discordapp.com/attachments/966266443287117855/1102460702955929630/beep-07a.wav", 0.8, false)
+        PlaySound(source)
         SendNotify(source, 'You have casted your vote', 'success')
         SaveResourceFile(GetCurrentResourceName(), "data/candidates.json", json.encode(candidates, { indent = true }), -1)
         SaveResourceFile(GetCurrentResourceName(), "data/players.json", json.encode(playersdata, { indent = true }), -1)

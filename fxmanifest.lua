@@ -15,17 +15,16 @@ files {
 
 shared_scripts {
     '@ox_lib/init.lua',
-    'config.lua'
+    'shared/config.lua'
 }
 
 server_scripts {
-    '@oxmysql/lib/MySQL.lua',
-    'editable/server.lua',
+    'shared/server.lua',
     'voting/server.lua'
 }
 
 client_scripts {
-    'editable/client.lua',
+    'shared/client.lua',
     'voting/client.lua',
 }
 
@@ -35,6 +34,5 @@ dependencies {
 }
 
 escrow_ignore {
-    'editable/*',
-    'config.lua'
+    'shared/*',
 }

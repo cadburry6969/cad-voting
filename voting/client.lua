@@ -136,13 +136,13 @@ end
 local function candidateInformation()
     local options = {
         {
-            title = "Add New Candidate",
+            title = "Add Candidate",
             onSelect = function(args)
                 addCandidate()
             end,
         },
         {
-            title = "Check Candidates",
+            title = "View Candidates",
             onSelect = function(args)
                 showCandidates()
             end,
@@ -226,13 +226,13 @@ local function controlPanel()
 end
 
 local function openBooth()
-    if GlobalState.votingPermission then
-        local hasPerm = HasPermission(GlobalState.votingPermission)
-        if not hasPerm then
-            SendNotify('You are not allowed to cast a vote')
-            return
-        end
-    end
+    -- if GlobalState.votingPermission then
+    --     local hasPerm = HasPermission(GlobalState.votingPermission)
+    --     if not hasPerm then
+    --         SendNotify('You are not allowed to cast a vote')
+    --         return
+    --     end
+    -- end
     openVoting()
 end
 ---#endregion FUNCTIONS
@@ -259,15 +259,12 @@ CreateThread(function()
         })
 
         function point:onEnter()
-            if GlobalState.votingStatus then
-                lib.showTextUI('[E] Voting Booth')
-            else
-                lib.showTextUI('Booth Closed')
-            end
+            local text = GlobalState.votingStatus and '[E] Voting Booth' or 'Booth Closed'
+            ShowText(text)
         end
 
         function point:onExit()
-            lib.hideTextUI()
+            HideText()
         end
 
         function point:nearby()
@@ -283,11 +280,11 @@ CreateThread(function()
         })
 
         function point:onEnter()
-            lib.showTextUI('[E] Voting Control Panel')
+            ShowText('[E] Voting Control Panel')
         end
 
         function point:onExit()
-            lib.hideTextUI()
+            HideText()
         end
 
         function point:nearby()

@@ -63,14 +63,29 @@ const castVote = () => {
 
 $(".submit-btn").on("click", () => castVote());
 
+var audioPlayer = null;
+const playSound = (audio, volume) => {
+    if (audioPlayer != null) {
+        audioPlayer.pause();
+    }
+
+    audioPlayer = new Howl({
+        src: ["./sounds/" + audio],
+    });
+    audioPlayer.volume(volume || 0.8);
+    audioPlayer.play();
+};
+
 window.addEventListener("message", (event) => {
     const eventData = event.data;
     switch (eventData.action) {
         case "showUI":
-            data = event.data.data;
+            data = eventData.data;
             return openUI();
         case "closeUI":
             return closeUI();
+        case "playSound":
+            return playSound(eventData.sound, eventData.volume);
         default:
             return;
     }
