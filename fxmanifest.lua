@@ -2,37 +2,38 @@ fx_version 'cerulean'
 game 'gta5'
 lua54 'yes'
 
-author 'Rishit & Cadburry (ByteCode Studios)'
-description 'Dynamic Voting NUI'
-version '1.0'
-
-ui_page 'nui/index.html'
-
-files {
-    'nui/**/*',
-    'nui/index.html',
-}
+author "Cadburry"
+description "Voting Interface"
 
 shared_scripts {
-    '@ox_lib/init.lua',
-    'shared/config.lua'
-}
-
-server_scripts {
-    'shared/server.lua',
-    'voting/server.lua'
+    "@ox_lib/init.lua",
+    "config.lua"
 }
 
 client_scripts {
-    'shared/client.lua',
-    'voting/client.lua',
+    "bridge/client.lua",
+    "module/client.lua",
+}
+
+server_scripts {
+    "@oxmysql/lib/MySQL.lua",
+    "bridge/server.lua",
+    "module/server.lua"
+}
+
+ui_page "web/index.html"
+
+files {
+    "web/**/*",
+    "web/index.html",
 }
 
 dependencies {
-    '/onesync',
-    'ox_lib'
+    'ox_lib',
+    '/onesync'
 }
 
 escrow_ignore {
-    'shared/*',
+    'bridge/*',
+    'config.lua'
 }
