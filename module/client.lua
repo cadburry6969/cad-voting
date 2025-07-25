@@ -1,9 +1,6 @@
----#region Declares
 local inVotingScreen = false
 local inVotingBooth = false
----#endregion Declares
 
----#region FUNCTIONS
 local function openUI()
     if inVotingScreen then return end
     local response = lib.callback.await("voting:server:getParties", false)
@@ -31,46 +28,7 @@ local function closeUI()
     })
 end
 
-local function toggleVoting()
-    if GlobalState.voting_status then
-        if inVotingScreen then
-            closeUI()
-        else
-            openUI()
-        end
-    else
-        Notification('Voting has been concluded', 'error')
-    end
-end
-
-local function addParty()
-    local input = lib.inputDialog("Set Candidate Information", {
-        { type = 'input', label = 'Character ID', required = true },
-        { type = 'input', label = 'Candidate Party Name',   required = true },
-        { type = 'input', label = 'Candidate Party Image',  required = true },
-    }) or {}
-    if input then
-        if not input[1] or not input[2] or not input[3] then return end
-        TriggerServerEvent("voting:server:addParty",
-            { citizenId = input[1], partyName = input[2], partyImage = input[3] })
-    end
-end
----#endregion FUNCTIONS
-
----#region NUICALLBACKS
-RegisterNUICallback('castVote', function(data, cb)
-    TriggerServerEvent('voting:server:addVotes', { partyId = data.partyId })
-    cb('ok')
-end)
-
-RegisterNUICallback('closeUI', function(data, cb)
-    closeUI()
-    cb('ok')
-end)
----#endregion NUICALLBACKS
-
----#region EVENTS
-RegisterNetEvent("voting:client:openVotingMenu", function()
+local function openVotingMenu()
     local options = {
         {
             title = "Add New Candidate",
@@ -91,9 +49,10 @@ RegisterNetEvent("voting:client:openVotingMenu", function()
         options = options
     })
     lib.showContext("voting_admin")
-end)
+end
 
-RegisterNetEvent("voting:client:showResults", function(parties)
+local function showResult()
+    local parties = lib.callback.await('voting:server:getParties', false)
     local options = {}
     if parties and next(parties) then
         for _, data in pairs(parties) do
@@ -114,9 +73,10 @@ RegisterNetEvent("voting:client:showResults", function(parties)
         options = options
     })
     lib.showContext("voting_results")
-end)
+end
 
-RegisterNetEvent("voting:client:showParties", function(parties)
+local function showParties()
+    local parties = lib.callback.await('voting:server:getParties', false)
     local options = {
         {
             title = 'Select to remove the candiate',
@@ -149,23 +109,43 @@ RegisterNetEvent("voting:client:showParties", function(parties)
         options = options
     })
     lib.showContext("voting_candidates")
-end)
+end
 
-RegisterNetEvent("voting:client:clearData", function(source)
-    local alert = lib.alertDialog({
-        header = 'Clear Voting Data',
-        content =
-        'Are you sure you want to clear voting data? \n\n This will remove all players vote status, all candidates and party votes !!',
-        centered = true,
-        cancel = true
-    })
-    if alert == 'confirm' then
-        TriggerServerEvent('voting:server:clearData')
+local function toggleVoting()
+    if GlobalState.voting_status then
+        if inVotingScreen then
+            closeUI()
+        else
+            openUI()
+        end
+    else
+        Notification('Voting has been concluded', 'error')
     end
-end)
----#endregion EVENTS
+end
 
----#region KEYBINDS
+local function addParty()
+    local input = lib.inputDialog("Set Candidate Information", {
+        { type = 'input', label = 'Character ID', required = true },
+        { type = 'input', label = 'Candidate Party Name',   required = true },
+        { type = 'input', label = 'Candidate Party Image',  required = true },
+    }) or {}
+    if input then
+        if not input[1] or not input[2] or not input[3] then return end
+        TriggerServerEvent("voting:server:addParty",
+            { citizenId = input[1], partyName = input[2], partyImage = input[3] })
+    end
+end
+
+RegisterNUICallback('castVote', function(data, cb)
+    TriggerServerEvent('voting:server:addVotes', { partyId = data.partyId })
+    cb('ok')
+end)
+
+RegisterNUICallback('closeUI', function(data, cb)
+    closeUI()
+    cb('ok')
+end)
+
 lib.addKeybind({
     name = 'voting',
     description = 'Access Voting Booth',
@@ -182,9 +162,7 @@ lib.addKeybind({
         end
     end
 })
----#endregion KEYBINDS
 
----#region INITDATA
 CreateThread(function()
     for _, data in pairs(Config.VotingBooths) do
         lib.zones.box({
@@ -217,7 +195,7 @@ CreateThread(function()
                     label = 'Commence/Conclude',
                     icon = 'fa-solid fa-person-booth',
                     canInteract = function()
-                        return IsAdmin()
+                        return HasControlsPermission()
                     end,
                     onSelect = function()
                         local alert = lib.alertDialog({
@@ -235,7 +213,7 @@ CreateThread(function()
                     label = 'Change Permission',
                     icon = 'fa-solid fa-person-booth',
                     canInteract = function()
-                        return IsAdmin()
+                        return HasControlsPermission()
                     end,
                     onSelect = function()
                         local input = lib.inputDialog('Permission', {
@@ -251,7 +229,7 @@ CreateThread(function()
                     label = 'Clear Permission',
                     icon = 'fa-solid fa-person-booth',
                     canInteract = function()
-                        return IsAdmin()
+                        return HasControlsPermission()
                     end,
                     onSelect = function()
                         TriggerServerEvent("voting:server:setPermission", { permission = false })
@@ -261,24 +239,39 @@ CreateThread(function()
                     label = 'Candidates Information',
                     icon = 'fa-solid fa-person-booth',
                     canInteract = function()
-                        return IsAdmin()
+                        return HasControlsPermission()
                     end,
                     onSelect = function()
-                        TriggerEvent("voting:client:openVotingMenu")
+                        openVotingMenu()
                     end
                 },
                 {
                     label = 'View Results',
                     icon = 'fa-solid fa-person-booth',
                     canInteract = function()
-                        return IsAdmin()
+                        return HasControlsPermission()
                     end,
                     onSelect = function()
-                        TriggerServerEvent("voting:server:viewResults")
+                        showResult()
                     end
                 },
+                {
+                    label = 'Clear Data',
+                    icon = 'fa-solid fa-trash',
+                    onSelect = function()
+                        local alert = lib.alertDialog({
+                            header = 'Clear Voting Data',
+                            content =
+                            'Are you sure you want to clear voting data? \n\n This will remove all players vote status, all candidates and party votes !!',
+                            centered = true,
+                            cancel = true
+                        })
+                        if alert == 'confirm' then
+                            TriggerServerEvent('voting:server:clearData')
+                        end
+                    end
+                }
             }
         })
     end
 end)
----#endregion INITDATA

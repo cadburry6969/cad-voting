@@ -1,9 +1,6 @@
----#region Declares
 local parties = {}
 local votersData = {}
----#endregion Declares
 
----#region Initiate Data
 CreateThread(function()
     -- Load parties
     Wait(100)
@@ -32,9 +29,7 @@ CreateThread(function()
     GlobalState.voting_status = GetResourceKvpInt('voting_status') == 1
     GlobalState.voting_permission = GetResourceKvpString('voting_permission')
 end)
----#endregion Initiate Data
 
----#region EVENTS
 RegisterNetEvent("voting:server:addParty", function(data)
     local src = source
     if not data.citizenId then Notification(src, "Invalid Citizen ID", "error") return end
@@ -89,14 +84,6 @@ RegisterNetEvent("voting:server:setPermission", function(data)
     Notification(source, "Permission updated to "..permission, "success", 2000)
 end)
 
-RegisterNetEvent("voting:server:viewResults", function()
-    TriggerClientEvent("voting:client:showResults", source, parties)
-end)
-
-RegisterNetEvent("voting:server:viewParties", function()
-    TriggerClientEvent("voting:client:showParties", source, parties)
-end)
-
 RegisterNetEvent("voting:server:clearData", function()
     parties = {}
     votersData = {}
@@ -104,33 +91,7 @@ RegisterNetEvent("voting:server:clearData", function()
     SaveResourceFile(GetCurrentResourceName(), "/db/voters.json", json.encode(votersData), -1)
     Notification(source, 'All data has been wiped', 'success')
 end)
----#endregion EVENTS
 
----#region CALLBACKS
 lib.callback.register("voting:server:getParties", function(source)
     return parties
 end)
----#endregion CALLBACKS
-
----#region COMMANDS
-lib.addCommand('votingadd', {
-    help = 'Voters list (Admin Only)',
-    restricted = 'group.admin'
-}, function(source, args, raw)
-    TriggerClientEvent('voting:client:openVotingMenu', source)
-end)
-
-lib.addCommand('votingtoggle', {
-    help = 'Toggle Voting Status (Admin Only)',
-    restricted = 'group.admin'
-}, function(source, args, raw)
-    TriggerEvent('voting:server:toggleVoting', source)
-end)
-
-lib.addCommand('votingclear', {
-    help = 'Clear all voting data (Admin Only)',
-    restricted = 'group.admin'
-}, function(source, args, raw)
-    TriggerClientEvent("voting:client:clearData", source)
-end)
----#endregion COMMANDS

@@ -1,6 +1,6 @@
 ---TODO: Move it to server side
 ---Checks if you are admin
-function IsAdmin()
+function HasControlsPermission()
     return true
 end
 
