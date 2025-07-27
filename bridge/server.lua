@@ -50,8 +50,5 @@ end
 ---@param eventName string
 ---@param data table<any>
 function OnEventTriggered(eventName, data)
-    if eventName == 'AddVotes' then
-        -- data.voterSource, data.voterIdentifier, data.partyId
-        -- exports.high_sounds:Play3DEntity(data.voterSource, NetworkGetNetworkIdFromEntity(GetPlayerPed(data.voterSource)), 3.0, "voted", 0.8, false)
-    end
+    if Config.Debug then print('[DEBUG] ', eventName, json.encode(data)) end
 end

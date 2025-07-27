@@ -38,13 +38,20 @@ RegisterNetEvent("voting:server:addParty", function(data)
     parties[data.citizenId] = partyData
     Notification(src, string.format('Added %s associated with %s', name, data.partyName), 'success')
     SaveResourceFile(GetCurrentResourceName(), "/db/parties.json", json.encode(parties,  { indent = true }), -1)
+    CreateThread(function()
+        OnEventTriggered('addParty', parties[data.citizenId])
+    end)
 end)
 
 RegisterNetEvent("voting:server:removeParty", function(data)
     if not data or not data.partyId then return end
+    local partyData = parties[data.partyId]
     parties[data.partyId] = nil
     Notification(source, 'Removed successfully!', 'success')
     SaveResourceFile(GetCurrentResourceName(), "/db/parties.json", json.encode(parties,  { indent = true }), -1)
+    CreateThread(function()
+        OnEventTriggered('removeParty', partyData)
+    end)
 end)
 
 RegisterNetEvent("voting:server:addVotes", function(data)
@@ -60,7 +67,7 @@ RegisterNetEvent("voting:server:addVotes", function(data)
         SaveResourceFile(GetCurrentResourceName(), "/db/parties.json", json.encode(parties), -1)
         SaveResourceFile(GetCurrentResourceName(), "/db/voters.json", json.encode(votersData), -1)
         CreateThread(function()
-            OnEventTriggered('AddVotes', { voterSource = source, voterIdentifier = citizenId, partyId = data.partyId })
+            OnEventTriggered('addVotes', { voterSource = source, voterIdentifier = citizenId, partyId = data.partyId })
         end)
     end
 end)
@@ -75,6 +82,9 @@ RegisterNetEvent("voting:server:toggleVoting", function()
         Notification(source, "The voting has commenced.", "success", 15000)
     end
     GlobalState.voting_status = not status
+    CreateThread(function()
+        OnEventTriggered('toggleVoting', { votingStatus = GlobalState.voting_status })
+    end)
 end)
 
 RegisterNetEvent("voting:server:setPermission", function(data)
@@ -82,6 +92,9 @@ RegisterNetEvent("voting:server:setPermission", function(data)
     SetResourceKvp('voting_permission', permission)
     GlobalState.voting_permission = permission
     Notification(source, "Permission updated to "..permission, "success", 2000)
+    CreateThread(function()
+        OnEventTriggered('setPermission', { permission = GlobalState.voting_permission })
+    end)
 end)
 
 RegisterNetEvent("voting:server:clearData", function()
@@ -90,6 +103,9 @@ RegisterNetEvent("voting:server:clearData", function()
     SaveResourceFile(GetCurrentResourceName(), "/db/parties.json", json.encode(parties,  { indent = true }), -1)
     SaveResourceFile(GetCurrentResourceName(), "/db/voters.json", json.encode(votersData), -1)
     Notification(source, 'All data has been wiped', 'success')
+    CreateThread(function()
+        OnEventTriggered('clearData', {})
+    end)
 end)
 
 lib.callback.register("voting:server:getParties", function(source)

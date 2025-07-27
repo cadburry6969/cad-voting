@@ -28,53 +28,6 @@ local function closeUI()
     })
 end
 
-local function openVotingMenu()
-    local options = {
-        {
-            title = "Add New Candidate",
-            onSelect = function(args)
-                addParty()
-            end,
-        },
-        {
-            title = "Check Candidates",
-            onSelect = function(args)
-                TriggerServerEvent('voting:server:viewParties')
-            end,
-        }
-    }
-    lib.registerContext({
-        id = 'voting_admin',
-        title = 'Candidate Information',
-        options = options
-    })
-    lib.showContext("voting_admin")
-end
-
-local function showResult()
-    local parties = lib.callback.await('voting:server:getParties', false)
-    local options = {}
-    if parties and next(parties) then
-        for _, data in pairs(parties) do
-            options[#options + 1] = {
-                title = string.format('%s', data.name),
-                description = string.format('%s : %d', data.party, data.votes or 0),
-                image = data.logo
-            }
-        end
-    else
-        options[#options + 1] = {
-            title = 'No votes assigned to parties'
-        }
-    end
-    lib.registerContext({
-        id = 'voting_results',
-        title = 'Voting Results',
-        options = options
-    })
-    lib.showContext("voting_results")
-end
-
 local function showParties()
     local parties = lib.callback.await('voting:server:getParties', false)
     local options = {
@@ -111,18 +64,6 @@ local function showParties()
     lib.showContext("voting_candidates")
 end
 
-local function toggleVoting()
-    if GlobalState.voting_status then
-        if inVotingScreen then
-            closeUI()
-        else
-            openUI()
-        end
-    else
-        Notification('Voting has been concluded', 'error')
-    end
-end
-
 local function addParty()
     local input = lib.inputDialog("Set Candidate Information", {
         { type = 'input', label = 'Character ID', required = true },
@@ -133,6 +74,65 @@ local function addParty()
         if not input[1] or not input[2] or not input[3] then return end
         TriggerServerEvent("voting:server:addParty",
             { citizenId = input[1], partyName = input[2], partyImage = input[3] })
+    end
+end
+
+local function openVotingMenu()
+    local options = {
+        {
+            title = "Add New Candidate",
+            onSelect = function(args)
+                addParty()
+            end,
+        },
+        {
+            title = "Check Candidates",
+            onSelect = function(args)
+                showParties()
+            end,
+        }
+    }
+    lib.registerContext({
+        id = 'voting_admin',
+        title = 'Candidate Information',
+        options = options
+    })
+    lib.showContext("voting_admin")
+end
+
+local function showResult()
+    local parties = lib.callback.await('voting:server:getParties', false)
+    local options = {}
+    if parties and next(parties) then
+        for _, data in pairs(parties) do
+            options[#options + 1] = {
+                title = string.format('%s', data.name),
+                description = string.format('%s : %d', data.party, data.votes or 0),
+                image = data.logo
+            }
+        end
+    else
+        options[#options + 1] = {
+            title = 'No votes assigned to parties'
+        }
+    end
+    lib.registerContext({
+        id = 'voting_results',
+        title = 'Voting Results',
+        options = options
+    })
+    lib.showContext("voting_results")
+end
+
+local function toggleVoting()
+    if GlobalState.voting_status then
+        if inVotingScreen then
+            closeUI()
+        else
+            openUI()
+        end
+    else
+        Notification('Voting has been concluded', 'error')
     end
 end
 
