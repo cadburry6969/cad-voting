@@ -30,7 +30,7 @@ CreateThread(function()
     GlobalState.voting_permission = GetResourceKvpString('voting_permission')
 end)
 
-RegisterNetEvent("voting:server:addParty", function(data)
+RegisterNetEvent("bs_voting:server:addParty", function(data)
     local src = source
     if not data.citizenId then Notification(src, "Invalid Citizen ID", "error") return end
     local name = GetCharacterName(data.citizenId)
@@ -43,7 +43,7 @@ RegisterNetEvent("voting:server:addParty", function(data)
     end)
 end)
 
-RegisterNetEvent("voting:server:removeParty", function(data)
+RegisterNetEvent("bs_voting:server:removeParty", function(data)
     if not data or not data.partyId then return end
     local partyData = parties[data.partyId]
     parties[data.partyId] = nil
@@ -54,7 +54,7 @@ RegisterNetEvent("voting:server:removeParty", function(data)
     end)
 end)
 
-RegisterNetEvent("voting:server:addVotes", function(data)
+RegisterNetEvent("bs_voting:server:addVotes", function(data)
     local source = source
     local citizenId = GetCharacterId(source)
     if not citizenId then return end
@@ -72,7 +72,7 @@ RegisterNetEvent("voting:server:addVotes", function(data)
     end
 end)
 
-RegisterNetEvent("voting:server:toggleVoting", function()
+RegisterNetEvent("bs_voting:server:toggleVoting", function()
     local source = source
     local status = GetResourceKvpInt('voting_status') == 1
     SetResourceKvpInt('voting_status', status and 0 or 1)
@@ -87,7 +87,7 @@ RegisterNetEvent("voting:server:toggleVoting", function()
     end)
 end)
 
-RegisterNetEvent("voting:server:setPermission", function(data)
+RegisterNetEvent("bs_voting:server:setPermission", function(data)
     local permission = data.permission or 'None'
     SetResourceKvp('voting_permission', permission)
     GlobalState.voting_permission = permission
@@ -97,7 +97,7 @@ RegisterNetEvent("voting:server:setPermission", function(data)
     end)
 end)
 
-RegisterNetEvent("voting:server:clearData", function()
+RegisterNetEvent("bs_voting:server:clearData", function()
     parties = {}
     votersData = {}
     SaveResourceFile(GetCurrentResourceName(), "/db/parties.json", json.encode(parties,  { indent = true }), -1)
@@ -108,6 +108,6 @@ RegisterNetEvent("voting:server:clearData", function()
     end)
 end)
 
-lib.callback.register("voting:server:getParties", function(source)
+lib.callback.register("bs_voting:server:getParties", function(source)
     return parties
 end)

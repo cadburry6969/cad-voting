@@ -3,7 +3,7 @@ local inVotingBooth = false
 
 local function openUI()
     if inVotingScreen then return end
-    local response = lib.callback.await("voting:server:getParties", false)
+    local response = lib.callback.await("bs_voting:server:getParties", false)
     if not next(response) then
         Notification("No candidates", "error")
         return
@@ -29,7 +29,7 @@ local function closeUI()
 end
 
 local function showParties()
-    local parties = lib.callback.await('voting:server:getParties', false)
+    local parties = lib.callback.await('bs_voting:server:getParties', false)
     local options = {
         {
             title = 'Select to remove the candiate',
@@ -51,7 +51,7 @@ local function showParties()
                     cancel = true
                 })
                 if alert == 'confirm' then
-                    TriggerServerEvent('voting:server:removeParty', { partyId = data.id })
+                    TriggerServerEvent('bs_voting:server:removeParty', { partyId = data.id })
                 end
             end
         }
@@ -72,7 +72,7 @@ local function addParty()
     }) or {}
     if input then
         if not input[1] or not input[2] or not input[3] then return end
-        TriggerServerEvent("voting:server:addParty",
+        TriggerServerEvent("bs_voting:server:addParty",
             { citizenId = input[1], partyName = input[2], partyImage = input[3] })
     end
 end
@@ -101,7 +101,7 @@ local function openVotingMenu()
 end
 
 local function showResult()
-    local parties = lib.callback.await('voting:server:getParties', false)
+    local parties = lib.callback.await('bs_voting:server:getParties', false)
     local options = {}
     if parties and next(parties) then
         for _, data in pairs(parties) do
@@ -137,7 +137,7 @@ local function toggleVoting()
 end
 
 RegisterNUICallback('castVote', function(data, cb)
-    TriggerServerEvent('voting:server:addVotes', { partyId = data.partyId })
+    TriggerServerEvent('bs_voting:server:addVotes', { partyId = data.partyId })
     cb('ok')
 end)
 
@@ -205,7 +205,7 @@ CreateThread(function()
                             cancel = true
                         })
                         if alert == 'confirm' then
-                            TriggerServerEvent("voting:server:toggleVoting")
+                            TriggerServerEvent("bs_voting:server:toggleVoting")
                         end
                     end
                 },
@@ -221,7 +221,7 @@ CreateThread(function()
                         })
                         if input and input[1] then
                             if input[1] == '' then input[1] = 'None' end
-                            TriggerServerEvent("voting:server:setPermission", { permission = input[1] })
+                            TriggerServerEvent("bs_voting:server:setPermission", { permission = input[1] })
                         end
                     end
                 },
@@ -232,7 +232,7 @@ CreateThread(function()
                         return HasControlsPermission()
                     end,
                     onSelect = function()
-                        TriggerServerEvent("voting:server:setPermission", { permission = false })
+                        TriggerServerEvent("bs_voting:server:setPermission", { permission = false })
                     end
                 },
                 {
@@ -267,7 +267,7 @@ CreateThread(function()
                             cancel = true
                         })
                         if alert == 'confirm' then
-                            TriggerServerEvent('voting:server:clearData')
+                            TriggerServerEvent('bs_voting:server:clearData')
                         end
                     end
                 }
